@@ -16,9 +16,12 @@ suppressPackageStartupMessages({
 
 "fit_model
 
-Train the model EXPR ~ TBA, using nested cross-validation to tune the
-parameters. With --min-R2=1, the best model is never fit after the nested
-CV. Pass 'NA' to the --seed option in order to avoid setting the seed.
+Train the model EXPR ~ TBA, using a nested cross-validation to evaluate
+the performance and tune the parameters. After the cross-validation,
+if the performance R^2 is greater than what specified by the `min-R2`
+argument, the model with the optimised parameters is trained on the
+whole data. Pass 'NA' to the --seed option in order to avoid setting the
+seed.
 
 Usage:
   fit_model [options] <EXPR_FILE> <TBA_FILE>
@@ -30,7 +33,7 @@ Arguments:
 
 Options:
   -f --folds=<N>             Pass NULL or <= 1 to avoid doing the nested CV [default: 5]
-  -n --nested-folds=<N>      [default: 10]
+  -n --nested-folds=<N>      Number of folds in the inner loop [default: 10]
   -m --min-R2=<U>            Minimum R^2 for which the model is fit [default: 0]
   -t --train-samples=<FILE>  List of training samples. [default: all of them]
   -o --outdir=<DIR>          Path to the output directory [default: ./]
