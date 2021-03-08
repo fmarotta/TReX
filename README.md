@@ -131,8 +131,8 @@ that predict gene expression from the total binding affinities.
 
 We recommend some preprocessing for the gene expression
 file; best practices are described at the [GTEx
-portal](https://www.gtexportal.org/home/documentationPage#staticTextAnal
-ysisMethods). In particular, we recommend normalization and
+portal](https://www.gtexportal.org/home/documentationPage#staticTextAnalysisMethods).
+In particular, we recommend normalization and
 inverse-normal transformation of the expression values. As TReX does
 not (yet) support custom covariates in the regression model, we also
 recommend to not work with the expression directly, but rather with the
@@ -198,6 +198,6 @@ genotypes and phenotypes are available. But first, we have to predict
 the gene expression in those individuals whose genotypes are available.
 The first step here is to compute the total binding affinities in those
 samples. The procedure is the same as in section [2. Computing the total
-binding affinity](#2.-Computing-the-total-binding-affinity), except that
+binding affinity](#2-computing-the-total-binding-affinity), except that
 now the VCF file refers to the new data set.
 
