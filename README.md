@@ -159,25 +159,26 @@ Rscript fit_model.R \
 
 Since we want to evaluate the performance of a model and tune some
 parameters at the same time, we must use a 'nested cross-validation.'
-The `folds` argument specifies the number of folds in the outer loop; in
-the existing literature, this is set to 5. If you don't want to evaluate
-the performance (it is time consuming after all), pass 1 to this
-argument. The `nested-folds` argument specifies the number of folds in the inner
-loop; by default, it is 10. After the cross-validation, the model with
-the best parameters is fit on the whole data. As a measure of the
-performance of the model, we use the R^2^ (the square between the true
-and the predicted expression values).
+The `folds` argument specifies the number of folds in the outer loop;
+in the existing literature, this is set to 5. If you don't want to
+evaluate the performance (it is time consuming after all), pass 1 to
+this argument. The `nested-folds` argument specifies the number of folds
+in the inner loop; by default, it is 10. After the cross-validation, the
+model with the best parameters is fit on the whole data. As a measure
+of the performance of the model, we use the R<sup>2</sup> (the square
+between the true and the predicted expression values).
 
 When you choose to evaluate the performance (thereby setting the `folds`
 argument to something greater than 2), you can decide to not bother
 fitting the model if the performance was too low. The `min-R2` argument
-lets you choose the minimum cross-validation R^2^ after which the model
-will be fitted. Recall that there are two steps: first the
+lets you choose the minimum cross-validation R<sup>2</sup> after which
+the model will be fitted. Recall that there are two steps: first the
 cross-validation evaluates the performance and finds the optimal
 parameters, then the model is fitted on the whole data. If, after the
-cross-validation, the performance was low (*i.e.* the R^2^ was low), it
-means that predicting the expression of this gene is too difficult for
-the model, so it may be best to discard that gene entirely.
+cross-validation, the performance was low (*i.e.* the R<sup>2</sup>
+was low), it means that predicting the expression of this gene is
+too difficult for the model, so it may be best to discard that gene
+entirely.
 
 The *samples_ID.txt* file should be a simple one-column file with one
 sample ID for each line. The individuals listed in this file will be
@@ -186,11 +187,10 @@ individuals for the validation or the testing of the model. By default,
 all individuals are used.
 
 This is likely to be the slowest step of the pipeline, but it can be
-parallelised at will.
-
-You don't have time to train these models? E-mail the authors of the
-paper: they will be more than happy to provide the pre-trained models.
-Maybe they will even uploaded them to a public server.
+parallelised at will. Nevertheless, if you cannot train these models,
+email the authors of the paper: they will be more than happy to provide
+the pre-trained models. Maybe the models will be even uploaded to a
+public server.
 
 ## Genotype-level TWAS
 
@@ -357,8 +357,8 @@ data set
 
 ```
 Rscript compute_delta_tba.R \
-    --vcf vcf/expr_dataset/chr7/vcf.gz \                 # The VCF file
     --bed regreg/chr7/regreg.bed \                       # The regulatory regions
+    --vcf vcf/expr_dataset/chr7/vcf.gz \                 # The VCF file
     --tba tba/expr_dataset/chr7/tba.tsv \                # The total binding affinity
     --snps tba/expr_dataset/chr7/vcfrider_snps.tsv \     # SNPs file (output of vcf\_rider)
     --threads 1 \                                        # Number of cores for parallelisation
@@ -388,7 +388,7 @@ training)
 **Remarks**
 
 For best results, we recommend to impute and munge the summary
-statistics with [fiz](https://github.com/bogdanlab/fizi). The summary
+statistics with [fizi](https://github.com/bogdanlab/fizi). The summary
 statistics themselves can be obtained in several ways: they can be
 downloaded from the web or computed in house by performing a GWAS with
 plink (or any other tool to perform GWA studies).
@@ -414,7 +414,11 @@ Rscript summary_twas.R \
     --output summary_twas/phenotype/trex_stwas.tsv      # Output file
 ```
 
-## Further help
+# References
+
+[manuscript in preparation]
+
+# Further help
 
 Please feel free to open an issue in the [GitHub
 repository](https://github.com/fmarotta/TReX) or contact the authors by
