@@ -374,14 +374,14 @@ SNP->TBA->Expression->Phenotype
 
 **Input**
 
-4. BED file with the regulatory regions (obtained previously)
+1. BED file with the regulatory regions (obtained previously)
 
-1. The delta-TBA (obtained in the previous step)
+2. The delta-TBA (obtained in the previous step)
 
 3. The weights of the affinities on gene expression (obtained in the
 training)
 
-2. Summary statistics (a GWAS Z-score for each SNP)
+4. Summary statistics (a GWAS Z-score for each SNP)
 
 5. A plink-BED file from a reference population (used to compute LD)
 
