@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 
-# individual_twas.R
+# genotype_twas.R
 #
-# Perform the individual-level TWAS.
+# Perform the genotype-level TWAS.
 #
 # Federico Marotta (federico.marotta@edu.unito.it)
 # Feb,Jun,Aug-Sep 2020
@@ -12,7 +12,7 @@ suppressPackageStartupMessages({
     library(fplyr)
 })
 
-"individual_twas
+"genotype_twas
 
 Associate the predicted expression to the phenotype. Use characters to force
 factors. The first column must contain the individual ID, the second the
