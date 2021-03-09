@@ -35,12 +35,12 @@ source("../R/utils.R")
 
 Perform the association. The optional options are just required to compute the
 delta-TBA from scratch; however, it is not recommended to compute the delta-TBA
-through this script: it is better to use the dedicated 'compute_delta_tba.sh'.
+through this script: it is better to use the dedicated 'compute_delta_tba.R'.
 
 Usage:
-  summarised_twas [options]
-  summarised_twas (-h | --help)
-  summarised_twas --version
+  summary_twas [options]
+  summary_twas (-h | --help)
+  summary_twas --version
 
 Options:
   -z --zscores=<FILE>             Summary statistics
