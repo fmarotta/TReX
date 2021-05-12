@@ -6,7 +6,8 @@ association study (TWAS).
 
 # Installation
 
-1. Clone the repository (`git clone git@github.com:fmarotta/TReX.git`)
+1. Download and unzip the [latest
+release](https://github.com/fmarotta/TReX/releases/latest)
 
 2. Install `vcf_rider` (follow the instructions at the [project's
 repository](https://github.com/vodkatad/vcf_rider))
@@ -28,7 +29,8 @@ Transcriptome-wide association studies can be performed in two modes:
 genotype-level, when all the genotypes of the individuals are available;
 and summary-level, when only summary statistics are available. While
 TReX supports both of these modes, the two pipelines are somewhat
-different and will be described separately.
+different and will be described separately. All the commands should be
+run from within the root of the repository, i.e. the `TReX` directory.
 
 ## Model training
 
