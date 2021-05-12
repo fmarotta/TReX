@@ -433,7 +433,8 @@ plink2 --vcf <your_vcf> --make-bed --out <your_output>
 
 # References
 
-[manuscript in preparation]
+* [BioRxiv
+  preprint](https://www.biorxiv.org/content/10.1101/2021.05.11.443571v1)
 
 # Further help
 
