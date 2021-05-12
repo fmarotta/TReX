@@ -47,7 +47,7 @@ function fvalid()
 function dvalid()
 {
     if [ ! -d "$1" ]; then
-        echo -e "Info: creating new directory $1.\n" >&2
+        echo -e "Info: creating new directory $1." >&2
         if ! mkdir -p $1; then
             echo -e "Error: could not create directory $1.\n"
             exit 1
@@ -129,6 +129,9 @@ for arg in vcf bed ref pwm outdir; do
     fi
 done
 
+# Create output directory
+dvalid $outdir
+
 # Create the uniform background, if necessary
 if [ -z ${bkg+x} ]; then echo "Info: No background provided, generating uniform one..." >&2
     bkg=$outdir/background.txt
@@ -139,7 +142,6 @@ fi
 for file in vcf bed ref pwm bkg; do
     fvalid ${!file}
 done
-dvalid $outdir
 
 # Look for vcf_rider
 if which vcf_rider > /dev/null; then
@@ -207,6 +209,6 @@ Rscript utils/aggregate_tba.R --too-large=$fraction \
 
 
 # Clear temporary files
-rm $vcfrider_tba
-rm $sorted_tba
+#rm $vcfrider_tba
+#rm $sorted_tba
 

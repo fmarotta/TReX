@@ -35,7 +35,7 @@ Options:
   -f --folds=<N>             Pass NULL or <= 1 to avoid doing the nested CV [default: 5]
   -n --nested-folds=<N>      Number of folds in the inner loop [default: 10]
   -m --min-R2=<U>            Minimum R^2 for which the model is fit [default: 0]
-  -t --train-samples=<FILE>  List of training samples. [default: all of them]
+  -t --train-samples=<FILE>  List of training samples [default: 'all of them']
   -o --outdir=<DIR>          Path to the output directory [default: ./]
   -j --threads=<N>           Number of cores for parallel computations [default: 1]
   -s --seed=<N>              Seed to train the model [default: 2020]
@@ -46,7 +46,7 @@ Options:
 argv <- docopt(gsub(" \n\\s+", " ", x = doc, perl = T))
 
 # Acquire the regression functions and parameters
-source("../R/trex_models.R")
+source("utils/trex_models.R")
 
 
 # Read the expression
@@ -54,8 +54,8 @@ expr <- fread(argv$EXPR_FILE)
 names(expr)[1] <- "GENE"
 
 # Read the samples
-if (argv$`train-samples` != "all of them") {
-	samples <- readLines(argv$`train-samples`)
+if (argv$`--train-samples` != "all of them") {
+	samples <- readLines(argv$`--train-samples`)
 	samples <- intersect(samples, names(expr))
 } else {
     samples <- names(expr)[2:length(expr)]
@@ -86,7 +86,7 @@ if (!is.null(argv$folds) & as.integer(argv$folds) > 1) {
     out <- c()
 }
 
-if (argv$`min-R2` < 1) {
+if (argv$`--min-R2` < 1) {
     if (!dir.exists(paste(argv$outdir, "cv", sep = "/")))
         if (!dir.create(paste(argv$outdir, "cv", sep = "/"),
                         recursive = T, showWarnings = F))
@@ -126,7 +126,7 @@ cv_function <- function(tba) {
         perf <- NestedCV(d.train,
                          params.grid = params.grid,
                          n.outer.folds = as.integer(argv$folds),
-                         n.inner.folds = as.integer(argv$`nested-folds`),
+                         n.inner.folds = as.integer(argv$`--nested-folds`),
                          verbose = as.integer(argv$verbose) - 1)
         l <- list(perf$inner$full, perf$outer$full, perf$outer$summ)
     } else {
@@ -136,13 +136,13 @@ cv_function <- function(tba) {
     # If the outer CV was not performed, or if the R2 of the outer CV is greater
     # than the user-specified threshold, fit the best model
     if ((is.null(argv$folds) || as.integer(argv$folds) <= 1) ||
-        (!is.null(perf$outer$summ) && perf$outer$summ$pred_perf_R2 >= as.numeric(argv$`min-R2`))) {
+        (!is.null(perf$outer$summ) && perf$outer$summ$pred_perf_R2 >= as.numeric(argv$`--min-R2`))) {
         if (argv$verbose > 0)
             message("Fitting best model...")
         cv <- CV(d.train,
                  NULL,
                  params.grid = params.grid,
-                 n.folds = as.integer(argv$`nested-folds`),
+                 n.folds = as.integer(argv$`--nested-folds`),
                  fit.best = TRUE,
                  verbose = as.integer(argv$verbose) - 1)
         if (!is.null(cv$fit)) {

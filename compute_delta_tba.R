@@ -43,9 +43,10 @@ Options:
 
 " -> doc
 argv <- docopt(gsub(" \n\\s+", " ", x = doc, perl = T))
+dir.create(dirname(argv$output), recursive = T)
 
 # Find the regions to be excluded due to length problems
-invalid_regions <- exclude_from_indel_length(argv$snps, as.numeric(argv$too_large))
+invalid_regions <- exclude_from_indel_length(argv$snps, as.numeric(argv$`--too-large`))
 regreg <- fread(argv$bed,
                 col.names = c("CHR", "START", "END", "ID"))
 regreg <- regreg[!ID %in% invalid_regions]

@@ -5,7 +5,7 @@
 # Perform the summary-level TWAS.
 #
 # Federico Marotta (federico.marotta@edu.unito.it)
-# Feb,Jun 2020
+# Feb,Jun,Nov 2020
 
 # Part of the code is derived from
 # `https://github.com/gusevlab/fusion_twas/blob/master/FUSION.assoc_test.R`
@@ -28,7 +28,7 @@ suppressPackageStartupMessages({
     # library(plink2R)
 })
 
-source("../R/utils.R")
+source("utils/utils.R")
 
 
 "summary_twas
@@ -65,7 +65,7 @@ Options:
 
 " -> doc
 argv <- docopt(gsub(" \n\\s+", " ", x = doc, perl = T))
-
+dir.create(dirname(argv$output), recursive = T)
 
 allele.qc = function(a1,a2,ref1,ref2) {
     # from https://github.com/gusevlab/fusion_twas
@@ -273,25 +273,25 @@ regreg <- as(fread(argv$regreg,
 seqlevelsStyle(regreg) <- "NCBI"
 
 
-# Compute the TBA of all the SNPS that fall in a regreg, even if we don't
-# have their Zscore
-if (!file.exists(argv$tba)) {
-    warning("This method for computing the delta-TBA is deprecated. ",
-            "You should use the dedicated script 'compute_delta_tba.sh' instead")
-    message("Computing the 'delta TBA'...")
-    tba <- compute.tba(argv$fasta, argv$background, argv$pwm, regreg, snps, argv$threads)
-    dir.create(dirname(argv$tba), recursive = TRUE)
-    saveRDS(tba, argv$tba)
-} else {
-    message("Using precomputed 'delta TBA'...")
-    tba <- readRDS(argv$tba)
-}
-
-# Compute the delta TBA
-if (argv$verbose > 0)
-    message("The 'delta TBA' matrix has ", nrow(tba$ref),
-            " SNPs and ", ncol(tba$ref), " TFs")
-delta <- log(tba$alt) - log(tba$ref) # Assuming additive effects
+# # Compute the TBA of all the SNPS that fall in a regreg, even if we don't
+# # have their Zscore
+# if (!file.exists(argv$tba)) {
+#     warning("This method for computing the delta-TBA is deprecated. ",
+#             "You should use the dedicated script 'compute_delta_tba.sh' instead")
+#     message("Computing the 'delta TBA'...")
+#     tba <- compute.tba(argv$fasta, argv$background, argv$pwm, regreg, snps, argv$threads)
+#     dir.create(dirname(argv$tba), recursive = TRUE)
+#     saveRDS(tba, argv$tba)
+# } else {
+#     message("Using precomputed 'delta TBA'...")
+#     tba <- readRDS(argv$tba)
+# }
+#
+# # Compute the delta TBA
+# if (argv$verbose > 0)
+#     message("The 'delta TBA' matrix has ", nrow(tba$ref),
+#             " SNPs and ", ncol(tba$ref), " TFs")
+# delta <- log(tba$alt) - log(tba$ref) # Assuming additive effects
 
 # Sumstats
 sumstat = fread(argv$zscores,
@@ -299,15 +299,15 @@ sumstat = fread(argv$zscores,
                 col.names = c("CHROM", "ID", "POS", "A1", "A2", "TYPE", "Z", "R2", "N", "P"))
 
 # Find common SNPs and establish a common ordering
-sumstat <- sumstat[!duplicated(sumstat$ID), ]
+sumstat <- sumstat[!duplicated(ID), ]
+sumstat <- sumstat[abs(Z) != Inf, ]
 sumstat <- na.omit(sumstat)
 sumstat$CHROM <- as.integer(sumstat$CHROM)
 sumstat$POS <- as.integer(sumstat$POS)
-genos$bim <- genos$bim[!duplicated(genos$bim$ID), ]
+genos$bim <- genos$bim[!duplicated(ID), ]
 
 sumstat$A1 <- toupper(sumstat$A1)
 sumstat$A2 <- toupper(sumstat$A2)
-sumstat$REF <- toupper(sumstat$REF)
 genos$bim$A1 <- toupper(genos$bim$A1)
 genos$bim$A2 <- toupper(genos$bim$A2)
 
@@ -340,18 +340,22 @@ snps <- GRanges(seqnames = genos$bim$CHROM,
                 A1 = sumstat$A1, # genos$bim$V5,
                 A2 = sumstat$A2, # genos$bim$V6,
                 Z = sumstat$Z)
+snps <- snps[!duplicated(snps$SNPID)]
 seqlevelsStyle(snps) <- "NCBI"
 
+# TBAs
+all_tbas <- readRDS(argv$tba)
+names(all_tbas$tba_by_genotype) <- strip_ensg_version(names(all_tbas$tba_by_genotype))
+m <- match(snps$SNPID, all_tbas$bim$SNPID)
+snps <- snps[!is.na(m)]
+tbas_bim <- all_tbas$bim[m[!is.na(m)]]
+flip_delta <- tbas_bim[tbas_bim$ALT != snps$A1]$SNPID
+
 # Weights
-all_betas <- fread(argv$weights, select = c("data.name", colnames(delta)))
-if (pmatch(tolower(argv$`strip-ensg-version`), "true", nomatch = FALSE)) {
+all_betas <- fread(argv$weights, drop = c("lambda", "(Intercept)"))
+if (pmatch(tolower(argv$`--strip-ensg-version`), "true", nomatch = FALSE)) {
     all_betas$data.name <- strip_ensg_version(all_betas$data.name)
 }
-
-# # Weights from fit
-# fit <- readRDS(argv$weights)
-# fit[sapply(fit, is.null)] <- NULL
-# names(fit) <- strip_ensg_version(names(fit))
 
 twas <- mclapply(mc.cores = argv$threads, all_betas$data.name, function(gene) {
 # twas <- lapply(all_betas$data.name, function(gene) {
@@ -375,9 +379,6 @@ twas <- mclapply(mc.cores = argv$threads, all_betas$data.name, function(gene) {
             return(NULL)
         }
 
-        # Get the betas
-        betas <- unlist(all_betas[data.name == gene, !"data.name"])
-
         # find the snps that affect that gene, i.e. those that fall in the regreg of that gene
         ov <- findOverlaps(regreg, snps)
         from <- which(grepl(gene, regreg$REGION))
@@ -388,6 +389,19 @@ twas <- mclapply(mc.cores = argv$threads, all_betas$data.name, function(gene) {
         if (!length(id)) {
             return(data.table(chr, twas_gene, 0, NA, NA))
         }
+
+        # Find the delta TBA
+        if (gene %in% names(all_tbas$tba_by_genotype)) {
+            tbas <- all_tbas$tba_by_genotype[[gene]]
+            delta <- tbas[[2]][id, ] - tbas[[1]][id, ]
+            delta[flip_delta, ] <- -delta[flip_delta, ]
+        } else {
+            message("No TBA for this gene")
+            return(data.table(chr, twas_gene, 0, NA, NA))
+        }
+
+        # Get the betas
+        betas <- unlist(all_betas[data.name == gene, !"data.name"])
 
         # We use sapply just to ensure that weights and zetas have the same order
         # and are named vectors
@@ -416,7 +430,7 @@ twas <- mclapply(mc.cores = argv$threads, all_betas$data.name, function(gene) {
     })
 })
 
-twas <- rbindlist(twas)
+twas <- rbindlist(twas, fill = F)
 names(twas) <- c("CHR", "GENE", "N_SNPS", "ZSCORE", "PVAL")
 fwrite(twas, argv$output, sep = "\t", quote = FALSE)
 

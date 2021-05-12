@@ -19,8 +19,8 @@ factors. The first column must contain the individual ID, the second the
 phenotype, and from the third onwards there must be the covariates.
 
 Usage:
-  individual_twas [options] <PHENO_FILE> <TREX_FILE>
-  individual_twas (-h | --help)
+  genotype_twas [options] <PHENO_FILE> <TREX_FILE>
+  genotype_twas (-h | --help)
 
 Arguments:
   TREX_FILE                         The predicted TBA-regulated expression
@@ -52,8 +52,8 @@ if (length(which(!w))) {
 names(pheno)[1] <- "IID"
 pheno$IID <- as.character(pheno$IID)
 
-if (argv$`twas-samples` != "all of them") {
-    samples <- readLines(argv$`twas-samples`)
+if (argv$`--twas-samples` != "all of them") {
+    samples <- readLines(argv$`--twas-samples`)
     pheno <- pheno[IID %in% samples]
 }
 
@@ -75,7 +75,7 @@ if (!is.null(argv$covar)) {
 }
 
 if (!dir.exists(argv$outdir))
-    if (!dir.create(argv$outdir))
+    if (!dir.create(argv$outdir, recursive = T))
         stop("Could not create output directory.")
 out <- paste0(argv$outdir, "/", names(pheno)[-1], ".trex_itwas.tsv")
 
@@ -117,7 +117,7 @@ fmply(argv$TREX_FILE, out, parallel = as.integer(argv$threads), function(expr) {
             })
         } else if (is.numeric(pheno[[ph]])) {
             tryCatch({
-                if (argv$`pheno-quantile-normalize`) {
+                if (argv$`--pheno-quantile-normalize`) {
                     d[[names(pheno)[ph]]] <- qnorm(
                         (rank(d[[names(pheno)[ph]]], na.last = "keep") - 0.5) / sum(!is.na(d[[names(pheno)[ph]]]))
                     )
@@ -144,5 +144,5 @@ fmply(argv$TREX_FILE, out, parallel = as.integer(argv$threads), function(expr) {
         }
     })
 
-    r
+    list(r)
 })

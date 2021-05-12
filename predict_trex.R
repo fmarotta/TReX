@@ -12,7 +12,7 @@ suppressPackageStartupMessages({
     library(fplyr)
 })
 
-source("../R/trex_models.R")
+source("utils/trex_models.R")
 
 
 "predict_trex
@@ -47,7 +47,7 @@ argv <- docopt(gsub(" \n\\s+", " ", x = doc, perl = T))
 
 
 fit <- readRDS(argv$FIT_OBJ)
-if (pmatch(tolower(argv$`strip-ensg-version`), "true", nomatch = FALSE)) {
+if (pmatch(tolower(argv$`--strip-ensg-version`), "true", nomatch = FALSE)) {
     names(fit) <- strip_ensg_version(names(fit))
 }
 
@@ -69,7 +69,7 @@ if (!is.null(argv$expression)) {
 }
 
 # Output files
-dir.create(argv$outdir)
+dir.create(argv$outdir, recursive = T)
 out <- c(
 	pred_expr = paste(argv$outdir, "trex_pred_expr.tsv", sep = "/"),
 	pred_stat = if (exists("true_expr"))
@@ -85,14 +85,14 @@ pred_function <- function(tba) {
     else
         r <- list(NULL)
 
-    if (argv$`test-samples` != "all of them") {
-        samples <- readLines(argv$`test-samples`)
+    if (argv$`--test-samples` != "all of them") {
+        samples <- readLines(argv$`--test-samples`)
         tba <- tba[IID %in% samples]
     }
     if (nrow(tba) == 0 || ncol(tba) == 0)
         return(r)
 
-    if (pmatch(tolower(argv$`strip-ensg-version`), "true", nomatch = FALSE)) {
+    if (pmatch(tolower(argv$`--strip-ensg-version`), "true", nomatch = FALSE)) {
         gene <- strip_ensg_version(tba$GENE[1])
     } else {
         gene <- tba$GENE[1]
