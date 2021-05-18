@@ -22,6 +22,8 @@ Bioconductor, as appropriate:
     * docopt
     * fplyr
     * glmnet
+    
+5. You will also need perl
 
 # Usage
 
