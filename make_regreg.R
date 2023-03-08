@@ -118,12 +118,14 @@ for (chr in chroms) {
         )
     }, mc.cores = as.integer(argv$threads))
 
-    # Exclude regions that gave an error
+    # Exclude regions that gave an error (the "try-error" class is given automatically
+    # by mclapply whenever a job fails; healthy regreg objects should be of class
+    # "data.table" and "data.frame")
     regreg <- lapply(regreg, function(r) {
-        if (class(r) != "try-error") {
+        if ("try-error" %in% class(r)) {
             r
         } else {
-            print(r)
+            message(r)
             NULL
         }
     })
